@@ -1,6 +1,8 @@
 package charts_img_maker
 
 import (
+	"fmt"
+	"github.com/google/uuid"
 	"github.com/wcharczuk/go-chart/v2"
 	"os"
 )
@@ -14,7 +16,7 @@ type Chart struct {
 	YValues []float64
 }
 
-func (c Chart) MakeChartImg() *os.File {
+func (c Chart) main() *os.File {
 
 	graph := chart.Chart{
 		Series: []chart.Series{
@@ -28,7 +30,9 @@ func (c Chart) MakeChartImg() *os.File {
 			},
 		},
 	}
-	f, _ := os.Create("output.png")
+
+	id := uuid.New()
+	f, _ := os.Create(fmt.Sprintf("static/%v.png", id.String()))
 	defer f.Close()
 	graph.Render(chart.PNG, f)
 

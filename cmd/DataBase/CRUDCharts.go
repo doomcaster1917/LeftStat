@@ -23,6 +23,11 @@ type Chart struct {
 	DataSets   []map[string]interface{}
 }
 
+type ChartsShort struct {
+	Id   int
+	Name string
+}
+
 type ChartBounds struct {
 	DatasetId   int
 	DatasetName string
@@ -45,6 +50,32 @@ func GetCharts() []string {
 		var datasets []map[string]interface{}
 		err := rows.Scan(&id, &name, &title, &datasets)
 		arr := Charts{id, name, title, datasets}
+		if err != nil {
+			fmt.Println(err)
+		}
+		bytes, err := json.Marshal(arr)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		result = append(result, string(bytes))
+	}
+	return result
+}
+
+func GetChartsShort() []string {
+	result := make([]string, 0)
+	rows, err := conn.Query(context.Background(),
+		"SELECT coalesce(id, 0), coalesce(name,'') FROM chart GROUP BY id")
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	for rows.Next() {
+		var id int
+		var name string
+		err := rows.Scan(&id, &name)
+		arr := ChartsShort{id, name}
 		if err != nil {
 			fmt.Println(err)
 		}

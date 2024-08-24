@@ -14,6 +14,8 @@ func (app *application) routes() *http.ServeMux {
 	mux.HandleFunc("/terms/create_chart", app.CreateChart)
 	mux.HandleFunc("/terms/set_axis", app.SetAxis)
 	mux.HandleFunc("/terms/update_chart", app.UpdateChart)
+	mux.HandleFunc("/terms/get_views", app.GetViews)
+	mux.HandleFunc("/terms/get_view", app.GetView)
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 

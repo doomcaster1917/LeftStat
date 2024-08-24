@@ -19,7 +19,7 @@ func RefreshModels() {
 		fmt.Fprintf(os.Stderr, "QueryRow failed 1: %v\n", err)
 	}
 
-	_, err = conn.Exec(context.Background(), "CREATE TABLE view (id SERIAL PRIMARY KEY, name VARCHAR(250), title VARCHAR(250),  seo_description TEXT, seo_keywords TEXT, description TEXT)")
+	_, err = conn.Exec(context.Background(), "CREATE TABLE view (id SERIAL PRIMARY KEY, name VARCHAR(250), title VARCHAR(250), img_addr VARCHAR(200), seo_description TEXT, seo_keywords TEXT, description TEXT)")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "QueryRow failed 4: %v\n", err)
 		os.Exit(1)

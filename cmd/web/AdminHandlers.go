@@ -1,7 +1,7 @@
 package main
 
 import (
-	"CommunistsStatistic/middleware"
+	"CommunistsStatistic/cmd/middleware"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -206,6 +206,35 @@ func (app *application) UpdateChart(res http.ResponseWriter, req *http.Request) 
 		} else {
 			fmt.Fprintf(response, "success")
 		}
+	}
+}
+
+func (app *application) GetViews(res http.ResponseWriter, req *http.Request) {
+	token := strings.ReplaceAll(req.Header.Get("Authorization"), "Bearer ", "")
+	err := middleware.Auth(token)
+	if err != nil {
+		fmt.Println(err)
+		HeaderConfig := WithAuth{auth: "false"}
+		HeaderConfig.setHeaders(res)
+	} else {
+		HeaderConfig := WithAuth{auth: "true"}
+		response := HeaderConfig.setHeaders(res)
+		fmt.Fprintf(response, "[%s]", strings.Join(middleware.GetViews(), `,`)) //)
+	}
+}
+
+func (app *application) GetView(res http.ResponseWriter, req *http.Request) {
+	err := req.ParseForm()
+	token := strings.ReplaceAll(req.Header.Get("Authorization"), "Bearer ", "")
+	err = middleware.Auth(token)
+	if err != nil {
+		fmt.Println(err)
+		HeaderConfig := WithAuth{auth: "false"}
+		HeaderConfig.setHeaders(res)
+	} else {
+		HeaderConfig := WithAuth{auth: "true"}
+		response := HeaderConfig.setHeaders(res)
+		fmt.Fprintf(response, "%s", middleware.GetView(req.Form.Get("id")))
 	}
 }
 
