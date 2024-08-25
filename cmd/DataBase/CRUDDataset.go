@@ -17,7 +17,7 @@ type DataSet struct {
 }
 
 type DataSets struct {
-	ID   int
+	Id   int
 	Name string
 }
 
@@ -25,10 +25,10 @@ func GetDataset(id int) []string {
 	result := make([]string, 0)
 	rows, err := conn.Query(context.Background(),
 		fmt.Sprintf("SELECT id, name, data, coalesce(raw_data,''), coalesce(raw_url,'')  FROM dataset WHERE id = %d", id))
-
 	if err != nil {
 		fmt.Println(err)
 	}
+
 	for rows.Next() {
 		var id int
 		var name, rawData, rawUrl string
@@ -56,6 +56,7 @@ func GetDatasets() []string {
 	if err != nil {
 		fmt.Println(err)
 	}
+
 	for rows.Next() {
 		var id int
 		var name string
@@ -82,6 +83,7 @@ func UpdateDataset(mode string, name string, raw string, data string, id int) er
 			fmt.Println(err)
 			return errors.New(fmt.Sprintf("%v", err))
 		}
+
 	} else {
 		_, err := conn.Query(context.Background(),
 			fmt.Sprintf("UPDATE dataset SET (name, data, raw_data, raw_url) = ('%s', '%s', null, '%s') WHERE id = %d", name, data, raw, id))
@@ -89,6 +91,25 @@ func UpdateDataset(mode string, name string, raw string, data string, id int) er
 			fmt.Println(err)
 			return errors.New(fmt.Sprintf("%v", err))
 		}
+
+	}
+	return nil
+}
+
+func CreateDataset(name string) error {
+	_, err := conn.Exec(context.Background(), "INSERT INTO dataset(name) VALUES($1)", name)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
+func DeleteDataset(id int) error {
+	_, err := conn.Exec(context.Background(), "DELETE from dataset WHERE id = $1", id)
+	if err != nil {
+		fmt.Println(err)
+		return err
 	}
 	return nil
 }

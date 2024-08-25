@@ -238,6 +238,218 @@ func (app *application) GetView(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func (app *application) UpdateView(res http.ResponseWriter, req *http.Request) {
+	err := req.ParseForm()
+	token := strings.ReplaceAll(req.Header.Get("Authorization"), "Bearer ", "")
+	err = middleware.Auth(token)
+
+	if err != nil {
+		fmt.Println(err)
+		HeaderConfig := WithAuth{auth: "false"}
+		HeaderConfig.setHeaders(res)
+	} else {
+		HeaderConfig := WithAuth{auth: "true"}
+		response := HeaderConfig.setHeaders(res)
+		err := middleware.UpdateView(req.Form.Get("name"), req.Form.Get("title"),
+			req.Form.Get("seoDescription"), req.Form.Get("seoKeywords"), req.Form.Get("description"), req.Form.Get("id"))
+		if err != nil {
+			http.Error(res, "Ошибка", 400)
+		} else {
+			fmt.Fprintf(response, "success")
+		}
+	}
+}
+
+func (app *application) SetCharts(res http.ResponseWriter, req *http.Request) {
+	err := req.ParseForm()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	token := strings.ReplaceAll(req.Header.Get("Authorization"), "Bearer ", "")
+	err = middleware.Auth(token)
+
+	fmt.Println(req.Form.Get("selected_charts"))
+	if err != nil {
+		fmt.Println(err)
+		HeaderConfig := WithAuth{auth: "false"}
+		HeaderConfig.setHeaders(res)
+	} else {
+		HeaderConfig := WithAuth{auth: "true"}
+		response := HeaderConfig.setHeaders(res)
+		err := middleware.SetCharts(req.Form.Get("selected_charts"), req.Form.Get("id"))
+		if err != nil {
+			http.Error(res, "Ошибка", 400)
+		} else {
+			fmt.Fprintf(response, "success")
+		}
+	}
+}
+
+func (app *application) SetMainChart(res http.ResponseWriter, req *http.Request) {
+	err := req.ParseForm()
+
+	token := strings.ReplaceAll(req.Header.Get("Authorization"), "Bearer ", "")
+	err = middleware.Auth(token)
+
+	if err != nil {
+		fmt.Println(err)
+		HeaderConfig := WithAuth{auth: "false"}
+		HeaderConfig.setHeaders(res)
+	} else {
+		HeaderConfig := WithAuth{auth: "true"}
+		response := HeaderConfig.setHeaders(res)
+		err := middleware.SetMainChart(req.Form.Get("main_chart_id"), req.Form.Get("view_id"))
+		if err != nil {
+			http.Error(res, "Ошибка", 400)
+		} else {
+			fmt.Fprintf(response, "success")
+		}
+	}
+}
+
+func (app *application) createView(res http.ResponseWriter, req *http.Request) {
+	err := req.ParseForm()
+
+	token := strings.ReplaceAll(req.Header.Get("Authorization"), "Bearer ", "")
+	err = middleware.Auth(token)
+
+	if err != nil {
+		fmt.Println(err)
+		HeaderConfig := WithAuth{auth: "false"}
+		HeaderConfig.setHeaders(res)
+	} else {
+		HeaderConfig := WithAuth{auth: "true"}
+		response := HeaderConfig.setHeaders(res)
+		err := middleware.CreateView(req.Form.Get("name"), req.Form.Get("title"))
+		if err != nil {
+			http.Error(res, "Ошибка", 400)
+		} else {
+			fmt.Fprintf(response, "success")
+		}
+	}
+}
+
+func (app *application) GetDatasets(res http.ResponseWriter, req *http.Request) {
+	token := strings.ReplaceAll(req.Header.Get("Authorization"), "Bearer ", "")
+	err := middleware.Auth(token)
+	if err != nil {
+		fmt.Println(err)
+		HeaderConfig := WithAuth{auth: "false"}
+		HeaderConfig.setHeaders(res)
+	} else {
+		HeaderConfig := WithAuth{auth: "true"}
+		response := HeaderConfig.setHeaders(res)
+		fmt.Fprintf(response, "[%s]", strings.Join(middleware.GetDatasets(), `,`)) //)
+	}
+}
+
+func (app *application) CreateDataset(res http.ResponseWriter, req *http.Request) {
+	err := req.ParseForm()
+
+	token := strings.ReplaceAll(req.Header.Get("Authorization"), "Bearer ", "")
+	err = middleware.Auth(token)
+
+	if err != nil {
+		fmt.Println(err)
+		HeaderConfig := WithAuth{auth: "false"}
+		HeaderConfig.setHeaders(res)
+	} else {
+		HeaderConfig := WithAuth{auth: "true"}
+		response := HeaderConfig.setHeaders(res)
+		err := middleware.CreateDataset(req.Form.Get("name"))
+		if err != nil {
+			http.Error(res, "Ошибка", 400)
+		} else {
+			fmt.Fprintf(response, "success")
+		}
+	}
+}
+
+func (app *application) deleteDataset(res http.ResponseWriter, req *http.Request) {
+	err := req.ParseForm()
+	token := strings.ReplaceAll(req.Header.Get("Authorization"), "Bearer ", "")
+	err = middleware.Auth(token)
+	if err != nil {
+		fmt.Println(err)
+		HeaderConfig := WithAuth{auth: "false"}
+		HeaderConfig.setHeaders(res)
+	} else {
+		HeaderConfig := WithAuth{auth: "true"}
+		response := HeaderConfig.setHeaders(res)
+
+		err := middleware.DeleteDataset(req.Form.Get("id"))
+		if err != nil {
+			http.Error(res, "Ошибка", 400)
+		} else {
+			fmt.Fprintf(response, "success")
+		}
+	}
+}
+
+func (app *application) deleteChart(res http.ResponseWriter, req *http.Request) {
+	err := req.ParseForm()
+	token := strings.ReplaceAll(req.Header.Get("Authorization"), "Bearer ", "")
+	err = middleware.Auth(token)
+	if err != nil {
+		fmt.Println(err)
+		HeaderConfig := WithAuth{auth: "false"}
+		HeaderConfig.setHeaders(res)
+	} else {
+		HeaderConfig := WithAuth{auth: "true"}
+		response := HeaderConfig.setHeaders(res)
+
+		err := middleware.DeleteChart(req.Form.Get("id"))
+		if err != nil {
+			http.Error(res, "Ошибка", 400)
+		} else {
+			fmt.Fprintf(response, "success")
+		}
+	}
+}
+
+func (app *application) deleteView(res http.ResponseWriter, req *http.Request) {
+	err := req.ParseForm()
+	token := strings.ReplaceAll(req.Header.Get("Authorization"), "Bearer ", "")
+	err = middleware.Auth(token)
+	if err != nil {
+		fmt.Println(err)
+		HeaderConfig := WithAuth{auth: "false"}
+		HeaderConfig.setHeaders(res)
+	} else {
+		HeaderConfig := WithAuth{auth: "true"}
+		response := HeaderConfig.setHeaders(res)
+
+		err := middleware.DeleteView(req.Form.Get("id"))
+		if err != nil {
+			http.Error(res, "Ошибка", 400)
+		} else {
+			fmt.Fprintf(response, "success")
+		}
+	}
+}
+
+func (app *application) createImg(res http.ResponseWriter, req *http.Request) {
+	err := req.ParseForm()
+	token := strings.ReplaceAll(req.Header.Get("Authorization"), "Bearer ", "")
+	err = middleware.Auth(token)
+	if err != nil {
+		fmt.Println(err)
+		HeaderConfig := WithAuth{auth: "false"}
+		HeaderConfig.setHeaders(res)
+	} else {
+		HeaderConfig := WithAuth{auth: "true"}
+		response := HeaderConfig.setHeaders(res)
+
+		err := middleware.CreateImg(req.Form.Get("id"))
+		if err != nil {
+			http.Error(res, "Ошибка", 400)
+		} else {
+			fmt.Fprintf(response, "success")
+		}
+	}
+}
+
 func (l Login) setHeaders(res http.ResponseWriter) {
 	res.Header().Set("Access-Control-Allow-Credentials", "true")
 	res.Header().Set("Content-Type", "text/html; charset=utf-8")

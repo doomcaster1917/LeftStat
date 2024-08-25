@@ -53,6 +53,7 @@ func GetCharts() []string {
 		if err != nil {
 			fmt.Println(err)
 		}
+
 		bytes, err := json.Marshal(arr)
 		if err != nil {
 			fmt.Println(err)
@@ -79,6 +80,7 @@ func GetChartsShort() []string {
 		if err != nil {
 			fmt.Println(err)
 		}
+
 		bytes, err := json.Marshal(arr)
 		if err != nil {
 			fmt.Println(err)
@@ -92,7 +94,7 @@ func GetChartsShort() []string {
 func GetChart(id int) string {
 	var result string
 	rows, err := conn.Query(context.Background(), fmt.Sprintf(
-		"SELECT c.id, c.name, c.title, coalesce(c.main_axis_id, 0), JSON_AGG(json_build_object('id', d.id, 'name', d.name, 'data', d.data)) "+
+		"SELECT c.id, c.name, coalesce(c.title, ''), coalesce(c.main_axis_id, 0), JSON_AGG(json_build_object('id', d.id, 'name', d.name, 'data', d.data)) "+
 			"as dataset_name FROM dataset_chart "+
 			"FULL JOIN chart c ON c.id = dataset_chart.chart_id "+
 			"FULL JOIN dataset d ON d.id = dataset_chart.dataset_id "+
@@ -102,6 +104,7 @@ func GetChart(id int) string {
 	if err != nil {
 		fmt.Println(222, err)
 	}
+
 	for rows.Next() {
 		var id, mainAxisId int
 		var name, title string
@@ -136,6 +139,7 @@ func BoundDatasetToChart(datasets []int, id int) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -145,6 +149,7 @@ func CreateChart(name string, title string) error {
 		fmt.Println(err)
 		return err
 	}
+
 	return nil
 }
 
@@ -154,6 +159,7 @@ func UpdateChart(name string, title string, id int) error {
 		fmt.Println(err)
 		return err
 	}
+
 	return nil
 }
 
@@ -161,6 +167,16 @@ func SetAxis(datasetId int, chartId int) error {
 	_, err := conn.Exec(context.Background(), "UPDATE chart SET main_axis_id = $1 WHERE id = $2", datasetId, chartId)
 	if err != nil {
 		return errors.New(fmt.Sprintf("%v", err))
+	}
+
+	return nil
+}
+
+func DeleteChart(id int) error {
+	_, err := conn.Exec(context.Background(), "DELETE from chart WHERE id = $1", id)
+	if err != nil {
+		fmt.Println(err)
+		return err
 	}
 	return nil
 }

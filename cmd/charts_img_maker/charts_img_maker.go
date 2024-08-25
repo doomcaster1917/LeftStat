@@ -16,7 +16,7 @@ type Chart struct {
 	YValues []float64
 }
 
-func (c Chart) main() *os.File {
+func (c Chart) main() string {
 
 	graph := chart.Chart{
 		Series: []chart.Series{
@@ -32,9 +32,10 @@ func (c Chart) main() *os.File {
 	}
 
 	id := uuid.New()
-	f, _ := os.Create(fmt.Sprintf("static/%v.png", id.String()))
+	name := fmt.Sprintf("static/%v.png", id.String())
+	f, _ := os.Create(name)
 	defer f.Close()
 	graph.Render(chart.PNG, f)
 
-	return f
+	return name
 }

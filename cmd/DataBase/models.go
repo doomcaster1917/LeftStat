@@ -49,7 +49,7 @@ func RefreshModels() {
 
 	_, err = conn.Exec(context.Background(), ""+
 		"CREATE TABLE chart_view (chart_id INTEGER REFERENCES chart (id) "+
-		"ON UPDATE CASCADE ON DELETE CASCADE, view_id INTEGER REFERENCES view (id) "+
+		"ON UPDATE CASCADE, view_id INTEGER REFERENCES view (id) "+
 		"ON UPDATE CASCADE, CONSTRAINT chart_view_pkey PRIMARY KEY (chart_id, view_id))")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)

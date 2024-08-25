@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 type DatasetsShort struct {
@@ -42,6 +43,8 @@ type OutputView struct {
 
 type SelectedDatasets []int
 
+type SelectedCharts []int
+
 func GetCharts() []string {
 	return database.GetCharts()
 }
@@ -72,10 +75,14 @@ func GetDataset(id int) []string {
 	return database.GetDataset(id)
 }
 
-func SelectDatasets(data string, idstr string) error {
+func GetDatasets() []string {
+	return database.GetDatasets()
+}
+
+func SelectDatasets(data string, idStr string) error {
 	var datasetsIds SelectedDatasets
 	json.Unmarshal([]byte(data), &datasetsIds)
-	id, _ := strconv.Atoi(idstr)
+	id, _ := strconv.Atoi(idStr)
 
 	return database.BoundDatasetToChart(datasetsIds, id)
 }
@@ -106,11 +113,55 @@ func GetViews() []string {
 }
 
 func GetView(id string) string {
-	//fltrd := make([]ChartsShort, 0)
-	//
 	view_id, _ := strconv.Atoi(id)
-	//genData := database.GetView(view_id)
-	//json.Unmarshal([]byte(genData), &fltrd)
-	//out := OutputView{}
-	return fmt.Sprintf("{\"general_data\":%v, \"chars_shors\": %v}", database.GetView(view_id), database.GetChartsShort())
+	separated := strings.Join(database.GetChartsShort(), ",")
+	return fmt.Sprintf("{\"general_data\":%v, \"chars_shorts\": [%v]}", database.GetView(view_id), separated)
+}
+
+func UpdateView(name string, title string, seoDescription string, seoKeywords string, description string, id string) error {
+	intId, _ := strconv.Atoi(id)
+	return database.UpdateView(name, title, seoDescription, seoKeywords, description, intId)
+}
+
+func SetCharts(data string, idStr string) error {
+	var chartsIds SelectedCharts
+	json.Unmarshal([]byte(data), &chartsIds)
+	id, _ := strconv.Atoi(idStr)
+
+	return database.BoundChartsToView(chartsIds, id)
+}
+
+func SetMainChart(chartIdSrt string, viewIdSrt string) error {
+	chartId, _ := strconv.Atoi(chartIdSrt)
+	viewId, _ := strconv.Atoi(viewIdSrt)
+	return database.SetMainChart(chartId, viewId)
+}
+
+func CreateView(name string, title string) error {
+	return database.CreateView(name, title)
+}
+
+func CreateDataset(name string) error {
+	return database.CreateDataset(name)
+}
+
+func DeleteDataset(idStr string) error {
+	id, _ := strconv.Atoi(idStr)
+	return database.DeleteDataset(id)
+}
+
+func DeleteChart(idStr string) error {
+	id, _ := strconv.Atoi(idStr)
+	return database.DeleteChart(id)
+}
+
+func DeleteView(idStr string) error {
+	id, _ := strconv.Atoi(idStr)
+	return database.DeleteView(id)
+}
+
+func CreateImg(id string) {
+	view_id, _ := strconv.Atoi(id)
+	data := database.GetView(view_id)
+	fmt.Println(data)
 }
