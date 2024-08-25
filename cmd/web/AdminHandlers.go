@@ -234,7 +234,7 @@ func (app *application) GetView(res http.ResponseWriter, req *http.Request) {
 	} else {
 		HeaderConfig := WithAuth{auth: "true"}
 		response := HeaderConfig.setHeaders(res)
-		fmt.Fprintf(response, "%s", middleware.GetView(req.Form.Get("id")))
+		fmt.Fprintf(response, "%s", middleware.GetViewAdmin(req.Form.Get("id")))
 	}
 }
 

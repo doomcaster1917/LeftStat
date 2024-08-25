@@ -26,7 +26,9 @@ func (app *application) routes() *http.ServeMux {
 	mux.HandleFunc("/terms/views/create_view", app.createView)
 	mux.HandleFunc("/terms/views/delete", app.deleteView)
 	mux.HandleFunc("/terms/views/create_img", app.createImg)
-	fileServer := http.FileServer(http.Dir("./ui/static/"))
+	mux.HandleFunc("/views/get_all", app.getViews)
+	mux.HandleFunc("/views/get_view", app.getView)
+	fileServer := http.FileServer(http.Dir("./static/"))
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
 	return mux

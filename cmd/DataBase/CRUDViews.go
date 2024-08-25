@@ -16,6 +16,7 @@ type View struct {
 	SeoDescription string
 	SeoKeywords    string
 	Description    string
+	MainChartId    int
 	BoundedCharts  []map[string]interface{}
 }
 
@@ -63,17 +64,17 @@ func GetViews() []string {
 func GetView(id int) string {
 	var result string
 	rows, err := conn.Query(context.Background(),
-		"SELECT coalesce(v.id, 0), coalesce(v.name,''), coalesce(v.title,''), coalesce(v.img_addr, ''), coalesce(v.seo_description,''), coalesce(v.seo_keywords,''), coalesce(v.description,''), JSON_AGG(json_build_object('id', c.id, 'name', c.name, 'title', c.title)) as bounded_charts FROM chart_view FULL JOIN view v ON v.id = chart_view.view_id FULL JOIN chart c ON c.id = chart_view.chart_id WHERE v.id = $1 GROUP BY v.id", id)
+		"SELECT coalesce(v.id, 0), coalesce(v.name,''), coalesce(v.title,''), coalesce(v.img_addr, ''), coalesce(v.seo_description,''), coalesce(v.seo_keywords,''), coalesce(v.description,''), coalesce(v.main_chart_id,0), JSON_AGG(json_build_object('id', c.id, 'name', c.name, 'title', c.title)) as bounded_charts FROM chart_view FULL JOIN view v ON v.id = chart_view.view_id FULL JOIN chart c ON c.id = chart_view.chart_id WHERE v.id = $1 GROUP BY v.id", id)
 
 	if err != nil {
 		fmt.Println(err)
 	}
 	for rows.Next() {
-		var id int
+		var id, mainChartId int
 		var name, title, seoDescription, seoKeywords, description, imgAddr string
 		var boundedCharts []map[string]interface{}
-		err := rows.Scan(&id, &name, &title, &imgAddr, &seoDescription, &seoKeywords, &description, &boundedCharts)
-		arr := View{id, name, title, imgAddr, seoDescription, seoKeywords, description, boundedCharts}
+		err := rows.Scan(&id, &name, &title, &imgAddr, &seoDescription, &seoKeywords, &description, &mainChartId, &boundedCharts)
+		arr := View{id, name, title, imgAddr, seoDescription, seoKeywords, description, mainChartId, boundedCharts}
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -92,6 +93,16 @@ func GetView(id int) string {
 func UpdateView(name string, title string, seoDescription string, seoKeywords string, description string, id int) error {
 	_, err := conn.Exec(context.Background(),
 		"UPDATE view SET (name, title, seo_description, seo_keywords, description) = ($1, $2, $3, $4, $5) WHERE id = $6", name, title, seoDescription, seoKeywords, description, id)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
+func UpdateViewImgName(imgName string, id int) error {
+	_, err := conn.Exec(context.Background(),
+		"UPDATE view SET img_addr = $1 WHERE id = $2", imgName, id)
 	if err != nil {
 		fmt.Println(err)
 		return err
