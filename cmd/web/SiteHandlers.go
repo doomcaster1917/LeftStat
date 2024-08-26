@@ -16,7 +16,7 @@ func (app *application) getView(res http.ResponseWriter, req *http.Request) {
 	id := req.URL.Query().Get("id")
 	data := middleware.GetView(id)
 	response := setHeaders(res)
-	response.Write([]byte(data))
+	response.Write(data)
 }
 
 func setHeaders(res http.ResponseWriter) http.ResponseWriter {

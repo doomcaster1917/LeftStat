@@ -21,7 +21,7 @@ type ChartsShort struct {
 	Name string
 }
 
-type OutputData struct {
+type OutputChartAdmin struct {
 	Id          int    `json:"Id"`
 	Name        string `json:"Name"`
 	Title       string `json:"Title"`
@@ -30,7 +30,7 @@ type OutputData struct {
 	Datasets    []encharts_maker.DataSets `json:"DataSets"`
 }
 
-type OutputView struct {
+type OutputViewAdmin struct {
 	Id             int
 	Name           string
 	Title          string
@@ -61,7 +61,7 @@ func GetCharts() []string {
 	return database.GetCharts()
 }
 
-func GetChart(id int) string {
+func GetChartAdmin(id int) string {
 	var ch encharts_maker.Chart
 	var dts DatasetsShort
 	fltrd := make([]DatasetsShort, 0)
@@ -73,7 +73,7 @@ func GetChart(id int) string {
 		fltrd = append(fltrd, dts)
 	}
 
-	out := OutputData{Id: ch.Id, Name: ch.Name, Title: ch.Title, HtmlChart: string(html), AllDatasets: fltrd, Datasets: ch.DataSets}
+	out := OutputChartAdmin{Id: ch.Id, Name: ch.Name, Title: ch.Title, HtmlChart: string(html), AllDatasets: fltrd, Datasets: ch.DataSets}
 	bytes, _ := json.Marshal(out)
 
 	return string(bytes)

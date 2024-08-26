@@ -72,7 +72,7 @@ func (app *application) GetChart(res http.ResponseWriter, req *http.Request) {
 		response := HeaderConfig.setHeaders(res)
 		if id == 0 {
 		} else {
-			fmt.Fprintf(response, "%s", middleware.GetChart(id)) //)
+			fmt.Fprintf(response, "%s", middleware.GetChartAdmin(id)) //)
 		}
 	}
 }
