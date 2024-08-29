@@ -85,7 +85,7 @@ func UpdateDataset(mode string, name string, raw string, data string, id int) er
 		}
 
 	} else {
-		fmt.Println(data)
+
 		_, err := conn.Query(context.Background(),
 			fmt.Sprintf("UPDATE dataset SET (name, data, raw_data, raw_url) = ('%s', '%s', null, '%s') WHERE id = %d", name, data, raw, id))
 		if err != nil {

@@ -17,11 +17,12 @@ type DataSets struct {
 }
 
 type Chart struct {
-	Id         int        `json:"Id"`
-	Name       string     `json:"Name"`
-	Title      string     `json:"Title"`
-	DataSets   []DataSets `json:"DataSets"`
-	MainAxisId int        `json:"MainAxisId"`
+	Id          int        `json:"Id"`
+	Name        string     `json:"Name"`
+	Title       string     `json:"Title"`
+	Description string     `json:"Description"`
+	DataSets    []DataSets `json:"DataSets"`
+	MainAxisId  int        `json:"MainAxisId"`
 }
 
 var test = map[int]int{2013: 2758, 2014: 2996, 2015: 3516, 2016: 3632, 2017: 3729, 2018: 3840, 2019: 4062, 2020: 4267, 2021: 4890, 2022: 5500, 2023: 5722}

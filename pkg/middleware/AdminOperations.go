@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"CommunistsStatistic/cmd/DataBase"
-	Fed "CommunistsStatistic/cmd/FedStatQueryHandler"
-	imgMaker "CommunistsStatistic/cmd/charts_img_maker"
-	"CommunistsStatistic/cmd/encharts_maker"
+	"CommunistsStatistic/pkg/DataBase"
+	Fed "CommunistsStatistic/pkg/FedStatQueryHandler"
+	imgMaker "CommunistsStatistic/pkg/charts_img_maker"
+	"CommunistsStatistic/pkg/encharts_maker"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -25,6 +25,7 @@ type OutputChartAdmin struct {
 	Id          int    `json:"Id"`
 	Name        string `json:"Name"`
 	Title       string `json:"Title"`
+	Description string `json:"Description"`
 	HtmlChart   string `json:"HtmlChart"`
 	AllDatasets []DatasetsShort
 	Datasets    []encharts_maker.DataSets `json:"DataSets"`
@@ -73,7 +74,7 @@ func GetChartAdmin(id int) string {
 		fltrd = append(fltrd, dts)
 	}
 
-	out := OutputChartAdmin{Id: ch.Id, Name: ch.Name, Title: ch.Title, HtmlChart: string(html), AllDatasets: fltrd, Datasets: ch.DataSets}
+	out := OutputChartAdmin{Id: ch.Id, Name: ch.Name, Title: ch.Title, Description: ch.Description, HtmlChart: string(html), AllDatasets: fltrd, Datasets: ch.DataSets}
 	bytes, _ := json.Marshal(out)
 
 	return string(bytes)
@@ -105,9 +106,9 @@ func SetAxis(datasetId string, chartId string) error {
 	return database.SetAxis(dataset_id, chart_id)
 }
 
-func UpdateChart(name string, title string, chartId string) error {
+func UpdateChart(name string, title string, description string, chartId string) error {
 	chart_id, _ := strconv.Atoi(chartId)
-	return database.UpdateChart(name, title, chart_id)
+	return database.UpdateChart(name, title, description, chart_id)
 }
 
 func UpdateDataset(mode string, name string, raw string, id int) error {
@@ -187,7 +188,6 @@ func CreateImg(id string) error {
 			values = v.Data
 		}
 	}
-	fmt.Println(data)
 	maker := filterDataForImage(values)
 	name := maker.MakeChartImg()
 	err := database.UpdateViewImgName(name, view_id)

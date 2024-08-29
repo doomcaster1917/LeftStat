@@ -19,6 +19,7 @@ type Chart struct {
 
 func (c Chart) MakeChartImg() string {
 	sort.Float64s(c.YValues)
+	sort.Float64s(c.XValues)
 	graph := chart.Chart{
 		YAxis: chart.YAxis{
 			ValueFormatter: func(v interface{}) string {
@@ -34,8 +35,7 @@ func (c Chart) MakeChartImg() string {
 					StrokeColor: chart.GetDefaultColor(0).WithAlpha(64),
 					FillColor:   chart.GetDefaultColor(0).WithAlpha(64),
 				},
-				XValues: []float64{2012.00, 2013.00, 2014.00, 2015.00, 2016.00, 2017.00, 2018.00, 2019.00, 2020.00, 2021.00, 2022.00, 2023.00}, //c.XValues,
-
+				XValues: c.XValues,
 				YValues: c.YValues,
 			},
 		},

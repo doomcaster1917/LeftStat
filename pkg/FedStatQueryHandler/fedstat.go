@@ -2,7 +2,6 @@ package FedStatQueryHandler
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -65,7 +64,6 @@ var testquery = "https://www.fedstat.ru/indicator/dataGrid.do?id=31481&lineObjec
 
 func GetStatData(query string) string {
 	j, _ := json.Marshal(parseResults(query))
-	fmt.Println(string(j))
 	return string(j)
 }
 
@@ -85,8 +83,7 @@ func parseResults(query string) map[string]int {
 func getResults(query string) []map[string]string {
 	var r1 MinimalConsumerBasketResponse
 
-	println(query)
-	resp, err := http.Get(URLRequest)
+	resp, err := http.Get(query)
 	if err != nil {
 		log.Fatalln(err)
 	}

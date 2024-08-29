@@ -1,7 +1,7 @@
 package main
 
 import (
-	"CommunistsStatistic/cmd/middleware"
+	"CommunistsStatistic/pkg/middleware"
 	"fmt"
 	"net/http"
 	"strings"

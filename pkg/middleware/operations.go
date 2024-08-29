@@ -1,9 +1,10 @@
 package middleware
 
 import (
-	"CommunistsStatistic/cmd/DataBase"
-	"CommunistsStatistic/cmd/encharts_maker"
+	"CommunistsStatistic/pkg/DataBase"
+	"CommunistsStatistic/pkg/encharts_maker"
 	"encoding/json"
+	"html/template"
 	"strconv"
 )
 
@@ -39,9 +40,10 @@ func GetAllViews() []string {
 }
 
 func GetView(idStr string) []byte {
-	//charts := make([]OutputChart, 0)
+
 	var out_view OutputView
 	var charts_ids []int
+	var html OutputChart
 
 	id, _ := strconv.Atoi(idStr)
 	raw_view := database.GetView(id)
@@ -52,7 +54,12 @@ func GetView(idStr string) []byte {
 
 	out_view.BoundedCharts = []OutputChart{}
 	for _, v := range charts_ids {
-		out_view.BoundedCharts = append(out_view.BoundedCharts, getChart(v))
+		html = getChart(v)
+		if len(html.HtmlChart) != 0 {
+			out_view.BoundedCharts = append(out_view.BoundedCharts, html)
+		} else {
+			continue
+		}
 	}
 
 	jdata, _ := json.Marshal(out_view)
@@ -62,8 +69,13 @@ func GetView(idStr string) []byte {
 
 func getChart(id int) OutputChart {
 	var ch encharts_maker.Chart
+	var html template.HTML
 	json.Unmarshal([]byte(database.GetChart(id)), &ch)
-	html := encharts_maker.GenerateChart(ch)
+	if len(ch.DataSets) > 0 && len(ch.DataSets[0].Data) != 0 {
+		html = encharts_maker.GenerateChart(ch)
+	} else {
+		html = ""
+	}
 	out := OutputChart{Id: ch.Id, Name: ch.Name, Title: ch.Title, HtmlChart: string(html)}
 
 	return out

@@ -16,11 +16,12 @@ type Charts struct {
 }
 
 type Chart struct {
-	Id         int
-	Name       string
-	Title      string
-	MainAxisId int
-	DataSets   []map[string]interface{}
+	Id          int
+	Name        string
+	Title       string
+	Description string
+	MainAxisId  int
+	DataSets    []map[string]interface{}
 }
 
 type ChartsShort struct {
@@ -94,7 +95,8 @@ func GetChartsShort() []string {
 func GetChart(id int) string {
 	var result string
 	rows, err := conn.Query(context.Background(), fmt.Sprintf(
-		"SELECT c.id, c.name, coalesce(c.title, ''), coalesce(c.main_axis_id, 0), JSON_AGG(json_build_object('id', d.id, 'name', d.name, 'data', d.data)) "+
+		"SELECT c.id, c.name, coalesce(c.title, ''), coalesce(c.description, ''), coalesce(c.main_axis_id, 0),"+
+			" JSON_AGG(json_build_object('id', d.id, 'name', d.name, 'data', d.data)) "+
 			"as dataset_name FROM dataset_chart "+
 			"FULL JOIN chart c ON c.id = dataset_chart.chart_id "+
 			"FULL JOIN dataset d ON d.id = dataset_chart.dataset_id "+
@@ -102,21 +104,21 @@ func GetChart(id int) string {
 			" GROUP BY c.id", id))
 
 	if err != nil {
-		fmt.Println(222, err)
+		fmt.Println(err)
 	}
 
 	for rows.Next() {
 		var id, mainAxisId int
-		var name, title string
+		var name, title, description string
 		var datasets []map[string]interface{}
-		err := rows.Scan(&id, &name, &title, &mainAxisId, &datasets)
-		arr := Chart{id, name, title, mainAxisId, datasets}
+		err := rows.Scan(&id, &name, &title, &description, &mainAxisId, &datasets)
+		arr := Chart{id, name, title, description, mainAxisId, datasets}
 		if err != nil {
 			fmt.Println(111, err)
 		}
 		bytes, err := json.Marshal(arr)
 		if err != nil {
-			fmt.Println(333, err)
+			fmt.Println(err)
 			os.Exit(1)
 		}
 		result += string(bytes)
@@ -153,8 +155,9 @@ func CreateChart(name string, title string) error {
 	return nil
 }
 
-func UpdateChart(name string, title string, id int) error {
-	_, err := conn.Exec(context.Background(), "UPDATE chart SET (name, title) = ($1, $2) WHERE id = $3", name, title, id)
+func UpdateChart(name string, title string, description string, id int) error {
+	_, err := conn.Exec(context.Background(), "UPDATE chart SET (name, title, description) "+
+		"= ($1, $2, $3) WHERE id = $4", name, title, description, id)
 	if err != nil {
 		fmt.Println(err)
 		return err
