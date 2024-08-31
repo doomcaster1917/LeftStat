@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-var frontendAddr = "api.leftstat.ru"
+var frontendAddr = "http://localhost:3000"
 
 type Login struct {
 	token string
