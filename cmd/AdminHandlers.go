@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+var frontendAddr = "api.leftstat.ru"
+
 type Login struct {
 	token string
 }
@@ -428,7 +430,7 @@ func (app *application) createImg(res http.ResponseWriter, req *http.Request) {
 func (l Login) setHeaders(res http.ResponseWriter) {
 	res.Header().Set("Access-Control-Allow-Credentials", "true")
 	res.Header().Set("Content-Type", "text/html; charset=utf-8")
-	res.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	res.Header().Set("Access-Control-Allow-Origin", fmt.Sprintf("%v", frontendAddr))
 	res.Header().Set("Access-Control-Allow-Methods", "POST, PUT, PATCH, GET, DELETE, OPTIONS")
 	res.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Content-Type-Options, access-control-allow-origin, Authorization")
 	res.Header().Set("Access-Control-Expose-Headers", "Authorization")
@@ -438,7 +440,7 @@ func (l Login) setHeaders(res http.ResponseWriter) {
 func (auth WithAuth) setHeaders(res http.ResponseWriter) http.ResponseWriter {
 	res.Header().Set("Access-Control-Allow-Credentials", "true")
 	res.Header().Set("Content-Type", "application/json")
-	res.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	res.Header().Set("Access-Control-Allow-Origin", fmt.Sprintf("%v", frontendAddr))
 	res.Header().Set("Access-Control-Allow-Methods", "POST, PUT, PATCH, GET, DELETE, OPTIONS")
 	res.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Content-Type-Options, access-control-allow-origin, Authorization")
 	res.Header().Set("Access-Control-Expose-Headers", "Authorization")

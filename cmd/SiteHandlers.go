@@ -21,6 +21,6 @@ func (app *application) getView(res http.ResponseWriter, req *http.Request) {
 
 func setHeaders(res http.ResponseWriter) http.ResponseWriter {
 	res.Header().Set("Content-Type", "application/json")
-	res.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	res.Header().Set("Access-Control-Allow-Origin", fmt.Sprintf("%v", frontendAddr))
 	return res
 }
