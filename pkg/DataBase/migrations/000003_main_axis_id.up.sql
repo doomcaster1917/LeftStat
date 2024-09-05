@@ -1,0 +1,1 @@
+ALTER TABLE chart ADD COLUMN main_axis_id INTEGER;
