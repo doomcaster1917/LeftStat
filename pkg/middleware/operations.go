@@ -17,6 +17,7 @@ type Views struct {
 
 type OutputChart struct {
 	Id          int    `json:"Id"`
+	Order       int    `json:"Order"`
 	Name        string `json:"Name"`
 	Title       string `json:"Title"`
 	HtmlChart   string `json:"HtmlChart"`
@@ -42,21 +43,28 @@ func GetAllViews() []string {
 func GetView(idStr string) []byte {
 
 	var out_view OutputView
-	var charts_ids []int
-	var html OutputChart
+	var charts_ids []string
+	var raw_charts []encharts_maker.Chart
+	var chart encharts_maker.Chart
 
 	id, _ := strconv.Atoi(idStr)
 	raw_view := database.GetView(id)
 	json.Unmarshal([]byte(raw_view), &out_view)
 	for _, v := range out_view.BoundedCharts {
-		charts_ids = append(charts_ids, v.Id)
+		charts_ids = append(charts_ids, strconv.Itoa(v.Id))
+	}
+
+	for _, v := range database.GetCharts(charts_ids) {
+		json.Unmarshal([]byte(v), &chart)
+		raw_charts = append(raw_charts, chart)
 	}
 
 	out_view.BoundedCharts = []OutputChart{}
-	for _, v := range charts_ids {
-		html = getChart(v)
-		if len(html.HtmlChart) != 0 {
-			out_view.BoundedCharts = append(out_view.BoundedCharts, html)
+	for _, v := range raw_charts {
+		html := getHtml(v)
+		if len(html) != 0 {
+			out_view.BoundedCharts = append(out_view.BoundedCharts,
+				OutputChart{Id: v.Id, Order: v.Order, Name: v.Name, Title: v.Title, HtmlChart: html})
 		} else {
 			continue
 		}
@@ -67,16 +75,12 @@ func GetView(idStr string) []byte {
 	return jdata
 }
 
-func getChart(id int) OutputChart {
-	var ch encharts_maker.Chart
+func getHtml(ch encharts_maker.Chart) string {
 	var html template.HTML
-	json.Unmarshal([]byte(database.GetChart(id)), &ch)
 	if len(ch.DataSets) > 0 && len(ch.DataSets[0].Data) != 0 {
 		html = encharts_maker.GenerateChart(ch)
 	} else {
 		html = ""
 	}
-	out := OutputChart{Id: ch.Id, Name: ch.Name, Title: ch.Title, HtmlChart: string(html)}
-
-	return out
+	return string(html)
 }

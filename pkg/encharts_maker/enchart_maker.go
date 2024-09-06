@@ -18,6 +18,7 @@ type DataSets struct {
 
 type Chart struct {
 	Id          int        `json:"Id"`
+	Order       int        `json:"Order"`
 	Name        string     `json:"Name"`
 	Title       string     `json:"Title"`
 	Description string     `json:"Description"`

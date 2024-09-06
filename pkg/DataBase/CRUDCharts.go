@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type Charts struct {
@@ -17,6 +18,7 @@ type Charts struct {
 
 type Chart struct {
 	Id          int
+	Order       int
 	Name        string
 	Title       string
 	Description string
@@ -34,7 +36,7 @@ type ChartBounds struct {
 	DatasetName string
 }
 
-func GetCharts() []string {
+func GetAllCharts() []string {
 	result := make([]string, 0)
 	rows, err := conn.Query(context.Background(),
 		"SELECT coalesce(c.id, 0), coalesce(c.name,''), coalesce(c.title,''), JSON_AGG(json_build_object('id', d.id, 'name', d.name)) "+
@@ -95,24 +97,24 @@ func GetChartsShort() []string {
 func GetChart(id int) string {
 	var result string
 	rows, err := conn.Query(context.Background(), fmt.Sprintf(
-		"SELECT c.id, c.name, coalesce(c.title, ''), coalesce(c.description, ''), coalesce(c.main_axis_id, 0),"+
+		"SELECT c.id, coalesce(c.return_order, 0), c.name, coalesce(c.title, ''), coalesce(c.description, ''), coalesce(c.main_axis_id, 0),"+
 			" JSON_AGG(json_build_object('id', d.id, 'name', d.name, 'data', d.data)) "+
 			"as dataset_name FROM dataset_chart "+
 			"FULL JOIN chart c ON c.id = dataset_chart.chart_id "+
 			"FULL JOIN dataset d ON d.id = dataset_chart.dataset_id "+
-			"WHERE c.id = %d"+
-			" GROUP BY c.id", id))
+			"WHERE c.id = %d "+
+			"GROUP BY c.id", id))
 
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	for rows.Next() {
-		var id, mainAxisId int
+		var id, order, mainAxisId int
 		var name, title, description string
 		var datasets []map[string]interface{}
-		err := rows.Scan(&id, &name, &title, &description, &mainAxisId, &datasets)
-		arr := Chart{id, name, title, description, mainAxisId, datasets}
+		err := rows.Scan(&id, &order, &name, &title, &description, &mainAxisId, &datasets)
+		arr := Chart{id, order, name, title, description, mainAxisId, datasets}
 		if err != nil {
 			fmt.Println(111, err)
 		}
@@ -122,6 +124,41 @@ func GetChart(id int) string {
 			os.Exit(1)
 		}
 		result += string(bytes)
+	}
+	return result
+}
+
+func GetCharts(ids []string) []string {
+	var result []string
+	params := "{" + strings.Join(ids, ",") + "}"
+	rows, err := conn.Query(context.Background(),
+		"SELECT c.id, coalesce(c.return_order, 0), c.name, coalesce(c.title, ''), coalesce(c.description, ''), coalesce(c.main_axis_id, 0),"+
+			" JSON_AGG(json_build_object('id', d.id, 'name', d.name, 'data', d.data)) "+
+			"as dataset_name FROM dataset_chart "+
+			"FULL JOIN chart c ON c.id = dataset_chart.chart_id "+
+			"FULL JOIN dataset d ON d.id = dataset_chart.dataset_id "+
+			"WHERE c.id = ANY($1::int[]) "+
+			"GROUP BY c.id ORDER BY c.return_order", params)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	for rows.Next() {
+		var id, order, mainAxisId int
+		var name, title, description string
+		var datasets []map[string]interface{}
+		err := rows.Scan(&id, &order, &name, &title, &description, &mainAxisId, &datasets)
+		arr := Chart{id, order, name, title, description, mainAxisId, datasets}
+		if err != nil {
+			fmt.Println(111, err)
+		}
+		bytes, err := json.Marshal(arr)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		result = append(result, string(bytes))
 	}
 	return result
 }
@@ -155,9 +192,9 @@ func CreateChart(name string, title string) error {
 	return nil
 }
 
-func UpdateChart(name string, title string, description string, id int) error {
-	_, err := conn.Exec(context.Background(), "UPDATE chart SET (name, title, description) "+
-		"= ($1, $2, $3) WHERE id = $4", name, title, description, id)
+func UpdateChart(name string, order string, title string, description string, id int) error {
+	_, err := conn.Exec(context.Background(), "UPDATE chart SET (name, return_order, title, description) "+
+		"= ($1, $2, $3, $4) WHERE id = $5", name, order, title, description, id)
 	if err != nil {
 		fmt.Println(err)
 		return err

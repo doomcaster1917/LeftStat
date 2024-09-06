@@ -1,0 +1,1 @@
+ALTER TABLE chart ADD COLUMN return_order INTEGER;

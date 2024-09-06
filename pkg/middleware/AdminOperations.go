@@ -24,6 +24,7 @@ type ChartsShort struct {
 type OutputChartAdmin struct {
 	Id          int    `json:"Id"`
 	Name        string `json:"Name"`
+	Order       int    `json:"Order"`
 	Title       string `json:"Title"`
 	Description string `json:"Description"`
 	HtmlChart   string `json:"HtmlChart"`
@@ -58,8 +59,8 @@ type SelectedDatasets []int
 
 type SelectedCharts []int
 
-func GetCharts() []string {
-	return database.GetCharts()
+func GetAllCharts() []string {
+	return database.GetAllCharts()
 }
 
 func GetChartAdmin(id int) string {
@@ -74,7 +75,8 @@ func GetChartAdmin(id int) string {
 		fltrd = append(fltrd, dts)
 	}
 
-	out := OutputChartAdmin{Id: ch.Id, Name: ch.Name, Title: ch.Title, Description: ch.Description, HtmlChart: string(html), AllDatasets: fltrd, Datasets: ch.DataSets}
+	out := OutputChartAdmin{Id: ch.Id, Order: ch.Order, Name: ch.Name, Title: ch.Title,
+		Description: ch.Description, HtmlChart: string(html), AllDatasets: fltrd, Datasets: ch.DataSets}
 	bytes, _ := json.Marshal(out)
 
 	return string(bytes)
@@ -106,9 +108,9 @@ func SetAxis(datasetId string, chartId string) error {
 	return database.SetAxis(dataset_id, chart_id)
 }
 
-func UpdateChart(name string, title string, description string, chartId string) error {
+func UpdateChart(name string, order string, title string, description string, chartId string) error {
 	chart_id, _ := strconv.Atoi(chartId)
-	return database.UpdateChart(name, title, description, chart_id)
+	return database.UpdateChart(name, order, title, description, chart_id)
 }
 
 func UpdateDataset(mode string, name string, raw string, id int) error {

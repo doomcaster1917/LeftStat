@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-var frontendAddr = "https://leftstat.ru"
+var frontendAddr = "http://localhost:3000"
 
 type Login struct {
 	token string
@@ -54,7 +54,7 @@ func (app *application) GetCharts(res http.ResponseWriter, req *http.Request) {
 	} else {
 		HeaderConfig := WithAuth{auth: "true"}
 		response := HeaderConfig.setHeaders(res)
-		fmt.Fprintf(response, "[%s]", strings.Join(middleware.GetCharts(), `,`)) //)
+		fmt.Fprintf(response, "[%s]", strings.Join(middleware.GetAllCharts(), `,`)) //)
 	}
 }
 
@@ -190,7 +190,7 @@ func (app *application) UpdateChart(res http.ResponseWriter, req *http.Request) 
 	} else {
 		HeaderConfig := WithAuth{auth: "true"}
 		response := HeaderConfig.setHeaders(res)
-		err := middleware.UpdateChart(req.Form.Get("name"), req.Form.Get("title"),
+		err := middleware.UpdateChart(req.Form.Get("name"), req.Form.Get("order"), req.Form.Get("title"),
 			req.Form.Get("description"), req.Form.Get("chart_id"))
 		if err != nil {
 			http.Error(res, fmt.Sprintf("%v", err), 400)
