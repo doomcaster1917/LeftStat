@@ -20,6 +20,7 @@ type Chart struct {
 func (c Chart) MakeChartImg() string {
 	sort.Float64s(c.YValues)
 	sort.Float64s(c.XValues)
+
 	graph := chart.Chart{
 		YAxis: chart.YAxis{
 			ValueFormatter: func(v interface{}) string {
@@ -44,7 +45,13 @@ func (c Chart) MakeChartImg() string {
 	id := uuid.New()
 	name := id.String()
 	f, _ := os.Create(fmt.Sprintf("static/%v.png", name))
-	defer f.Close()
+	fmt.Println(f)
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(f)
 	graph.Render(chart.PNG, f)
 
 	return name + ".png"

@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-var frontendAddr = "http://localhost:3000"
+var frontendAddr = "https://leftstat.ru"
 
 type Login struct {
 	token string
@@ -411,6 +411,7 @@ func (app *application) createImg(res http.ResponseWriter, req *http.Request) {
 	err := req.ParseForm()
 	token := strings.ReplaceAll(req.Header.Get("Authorization"), "Bearer ", "")
 	err = middleware.Auth(token)
+
 	if err != nil {
 		HeaderConfig := WithAuth{auth: "false"}
 		HeaderConfig.setHeaders(res)

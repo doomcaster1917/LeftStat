@@ -48,11 +48,9 @@ func check_JWT(tokenString string) error {
 }
 
 func Auth(authHeader string) error {
-	//var bearerJwt AuthorizationHeader
-	//err := json.Unmarshal(authHeader, &bearerJwt)
+
 	err := check_JWT(authHeader)
 	if err != nil {
-		fmt.Println(err)
 		return errors.New(fmt.Sprintf("%v", err))
 	} else {
 		return nil

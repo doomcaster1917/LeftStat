@@ -185,6 +185,7 @@ func CreateImg(id string) error {
 
 	data = database.GetChart(d.MainChartId)
 	json.Unmarshal([]byte(data), &d)
+
 	for _, v := range d.DataSets {
 		if v.Id == d.MainAxisId {
 			values = v.Data
