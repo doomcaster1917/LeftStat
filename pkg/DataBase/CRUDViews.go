@@ -34,8 +34,8 @@ func GetViews() []string {
 		"SELECT coalesce(v.id, 0), coalesce(v.name,''), coalesce(v.title,''), coalesce(v.img_addr, ''), "+
 			"JSON_AGG(json_build_object('id', c.id, 'name', c.name, 'title', c.title)) "+
 			"as bounded_charts FROM chart_view "+
-			"FULL JOIN view v ON v.id = chart_view.view_id "+
-			"FULL JOIN chart c ON c.id = chart_view.chart_id "+
+			"JOIN view v ON v.id = chart_view.view_id "+
+			"JOIN chart c ON c.id = chart_view.chart_id "+
 			"GROUP BY v.id")
 
 	if err != nil {
@@ -64,7 +64,11 @@ func GetViews() []string {
 func GetView(id int) string {
 	var result string
 	rows, err := conn.Query(context.Background(),
-		"SELECT coalesce(v.id, 0), coalesce(v.name,''), coalesce(v.title,''), coalesce(v.img_addr, ''), coalesce(v.seo_description,''), coalesce(v.seo_keywords,''), coalesce(v.description,''), coalesce(v.main_chart_id,0), JSON_AGG(json_build_object('id', c.id, 'name', c.name, 'title', c.title)) as bounded_charts FROM chart_view FULL JOIN view v ON v.id = chart_view.view_id FULL JOIN chart c ON c.id = chart_view.chart_id WHERE v.id = $1 GROUP BY v.id", id)
+		"SELECT coalesce(v.id, 0), coalesce(v.name,''), coalesce(v.title,''), coalesce(v.img_addr, ''), coalesce(v.seo_description,''), coalesce(v.seo_keywords,''), coalesce(v.description,''), coalesce(v.main_chart_id,0), "+
+			"JSON_AGG(json_build_object('id', c.id, 'name', c.name, 'title', c.title)) as bounded_charts "+
+			"FROM chart_view "+
+			"FULL JOIN view v ON v.id = chart_view.view_id "+
+			"FULL JOIN chart c ON c.id = chart_view.chart_id WHERE v.id = $1 GROUP BY v.id", id)
 
 	if err != nil {
 		fmt.Println(err)

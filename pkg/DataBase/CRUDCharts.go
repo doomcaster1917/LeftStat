@@ -128,7 +128,7 @@ func GetChart(id int) string {
 	return result
 }
 
-func GetCharts(ids []string) []string {
+func GetCharts(ids []string) string {
 	var result []string
 	params := "{" + strings.Join(ids, ",") + "}"
 	rows, err := conn.Query(context.Background(),
@@ -160,7 +160,7 @@ func GetCharts(ids []string) []string {
 		}
 		result = append(result, string(bytes))
 	}
-	return result
+	return fmt.Sprintf("[%s]", strings.Join(result, `,`))
 }
 
 func BoundDatasetToChart(datasets []int, id int) error {

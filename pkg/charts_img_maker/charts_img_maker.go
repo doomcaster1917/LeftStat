@@ -44,7 +44,10 @@ func (c Chart) MakeChartImg() string {
 
 	id := uuid.New()
 	name := id.String()
-	f, _ := os.Create(fmt.Sprintf("static/%v.png", name))
+	f, err := os.Create(fmt.Sprintf("static/%v.png", name))
+	if err != nil {
+		fmt.Println(err)
+	}
 	fmt.Println(f)
 	defer func(f *os.File) {
 		err := f.Close()
