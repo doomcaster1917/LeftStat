@@ -1,0 +1,1 @@
+migrate -path=pkg/DataBase/migrations -database "postgres://postgres:89908990aSa@127.0.0.1/leftstat?sslmode=disable" -verbose up

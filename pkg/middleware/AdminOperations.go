@@ -7,6 +7,11 @@ import (
 	"CommunistsStatistic/pkg/encharts_maker"
 	"encoding/json"
 	"fmt"
+	"io"
+	"mime"
+	"mime/multipart"
+	"net/http"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -130,12 +135,12 @@ func GetViews() []string {
 func GetViewAdmin(id string) string {
 	view_id, _ := strconv.Atoi(id)
 	separated := strings.Join(database.GetChartsShort(), ",")
-	return fmt.Sprintf("{\"general_data\":%v, \"chars_shorts\": [%v]}", database.GetView(view_id), separated)
+	return fmt.Sprintf("{\"general_data\":%v, \"chars_shorts\": [%v]}", database.GetViewAdmin(view_id), separated)
 }
 
-func UpdateView(name string, title string, seoDescription string, seoKeywords string, description string, id string) error {
+func UpdateView(name, title, slug, seoDescription, seoKeywords, description, id string) error {
 	intId, _ := strconv.Atoi(id)
-	return database.UpdateView(name, title, seoDescription, seoKeywords, description, intId)
+	return database.UpdateView(name, title, slug, seoDescription, seoKeywords, description, intId)
 }
 
 func SetCharts(data string, idStr string) error {
@@ -180,7 +185,7 @@ func CreateImg(id string) error {
 	var values map[int]int
 
 	view_id, _ := strconv.Atoi(id)
-	data := database.GetView(view_id)
+	data := database.GetViewAdmin(view_id)
 	json.Unmarshal([]byte(data), &d)
 
 	data = database.GetChart(d.MainChartId)
@@ -208,4 +213,46 @@ func filterDataForImage(raw map[int]int) imgMaker.Chart {
 		j.YValues = append(j.YValues, float64(v))
 	}
 	return j
+}
+
+func DownloadViewImage(req *http.Request) error {
+	var viewIdStr string
+	var filename string
+	mForm := req.MultipartForm
+	for k, _ := range mForm.File {
+		file, fileHeader, err := req.FormFile(k)
+		defer func(file multipart.File) {
+			err := file.Close()
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+		}(file)
+
+		out, err := os.Create(fmt.Sprintf("static/%v", fileHeader.Filename))
+
+		defer out.Close()
+		_, err = io.Copy(out, file)
+		if err != nil {
+			return err
+		}
+		_, params, err := mime.ParseMediaType(fileHeader.Header["Content-Disposition"][0])
+		viewIdStr = params["name"]
+		filename = params["filename"]
+	}
+	id, err := strconv.Atoi(viewIdStr)
+	err = saveDownloadedImgName(id, filename)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
+func saveDownloadedImgName(viewId int, filename string) error {
+	err := database.UpdateViewImgName(filename, viewId)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
 }

@@ -8,10 +8,24 @@ import (
 	"os"
 )
 
+type ViewAdmin struct {
+	Id             int
+	Name           string
+	Title          string
+	Slug           string
+	ImgAddr        string
+	SeoDescription string
+	SeoKeywords    string
+	Description    string
+	MainChartId    int
+	BoundedCharts  []map[string]interface{}
+}
+
 type View struct {
 	Id             int
 	Name           string
 	Title          string
+	Slug           string
 	ImgAddr        string
 	SeoDescription string
 	SeoKeywords    string
@@ -24,6 +38,7 @@ type Views struct {
 	Id            int
 	Name          string
 	Title         string
+	Slug          string
 	ImgAddr       string
 	BoundedCharts []map[string]interface{}
 }
@@ -31,11 +46,11 @@ type Views struct {
 func GetViews() []string {
 	var result []string
 	rows, err := conn.Query(context.Background(),
-		"SELECT coalesce(v.id, 0), coalesce(v.name,''), coalesce(v.title,''), coalesce(v.img_addr, ''), "+
+		"SELECT coalesce(v.id, 0), coalesce(v.name,''), coalesce(v.title,''), v.slug, coalesce(v.img_addr, ''), "+
 			"JSON_AGG(json_build_object('id', c.id, 'name', c.name, 'title', c.title)) "+
 			"as bounded_charts FROM chart_view "+
-			"JOIN view v ON v.id = chart_view.view_id "+
-			"JOIN chart c ON c.id = chart_view.chart_id "+
+			"RIGHT JOIN view v ON v.id = chart_view.view_id "+
+			"LEFT JOIN chart c ON c.id = chart_view.chart_id "+
 			"GROUP BY v.id")
 
 	if err != nil {
@@ -43,10 +58,10 @@ func GetViews() []string {
 	}
 	for rows.Next() {
 		var id int
-		var name, title, imgAddr string
+		var name, title, slug, imgAddr string
 		var boundedCharts []map[string]interface{}
-		err := rows.Scan(&id, &name, &title, &imgAddr, &boundedCharts)
-		arr := Views{id, name, title, imgAddr, boundedCharts}
+		err := rows.Scan(&id, &name, &title, &slug, &imgAddr, &boundedCharts)
+		arr := Views{id, name, title, slug, imgAddr, boundedCharts}
 
 		if err != nil {
 			fmt.Println(err)
@@ -61,10 +76,10 @@ func GetViews() []string {
 	return result
 }
 
-func GetView(id int) string {
+func GetViewAdmin(id int) string {
 	var result string
 	rows, err := conn.Query(context.Background(),
-		"SELECT coalesce(v.id, 0), coalesce(v.name,''), coalesce(v.title,''), coalesce(v.img_addr, ''), coalesce(v.seo_description,''), coalesce(v.seo_keywords,''), coalesce(v.description,''), coalesce(v.main_chart_id,0), "+
+		"SELECT coalesce(v.id, 0), coalesce(v.name,''), coalesce(v.title,''), v.slug, coalesce(v.img_addr, ''), coalesce(v.seo_description,''), coalesce(v.seo_keywords,''), coalesce(v.description,''), coalesce(v.main_chart_id,0), "+
 			"JSON_AGG(json_build_object('id', c.id, 'name', c.name, 'title', c.title)) as bounded_charts "+
 			"FROM chart_view "+
 			"FULL JOIN view v ON v.id = chart_view.view_id "+
@@ -75,10 +90,10 @@ func GetView(id int) string {
 	}
 	for rows.Next() {
 		var id, mainChartId int
-		var name, title, seoDescription, seoKeywords, description, imgAddr string
+		var name, title, slug, seoDescription, seoKeywords, description, imgAddr string
 		var boundedCharts []map[string]interface{}
-		err := rows.Scan(&id, &name, &title, &imgAddr, &seoDescription, &seoKeywords, &description, &mainChartId, &boundedCharts)
-		arr := View{id, name, title, imgAddr, seoDescription, seoKeywords, description, mainChartId, boundedCharts}
+		err := rows.Scan(&id, &name, &title, &slug, &imgAddr, &seoDescription, &seoKeywords, &description, &mainChartId, &boundedCharts)
+		arr := ViewAdmin{id, name, title, slug, imgAddr, seoDescription, seoKeywords, description, mainChartId, boundedCharts}
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -94,9 +109,9 @@ func GetView(id int) string {
 	return result
 }
 
-func UpdateView(name string, title string, seoDescription string, seoKeywords string, description string, id int) error {
+func UpdateView(name, title, slug, seoDescription, seoKeywords, description string, id int) error {
 	_, err := conn.Exec(context.Background(),
-		"UPDATE view SET (name, title, seo_description, seo_keywords, description) = ($1, $2, $3, $4, $5) WHERE id = $6", name, title, seoDescription, seoKeywords, description, id)
+		"UPDATE view SET (name, title, slug, seo_description, seo_keywords, description) = ($1, $2, $3, $4, $5, $6) WHERE id = $7", name, title, slug, seoDescription, seoKeywords, description, id)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -105,6 +120,7 @@ func UpdateView(name string, title string, seoDescription string, seoKeywords st
 }
 
 func UpdateViewImgName(imgName string, id int) error {
+	fmt.Println(imgName, id)
 	_, err := conn.Exec(context.Background(),
 		"UPDATE view SET img_addr = $1 WHERE id = $2", imgName, id)
 	if err != nil {
@@ -131,6 +147,45 @@ func BoundChartsToView(chartsIds []int, viewId int) error {
 	}
 
 	return nil
+}
+
+func GetView(id int) []byte {
+	var result []byte
+	rows, err := conn.Query(context.Background(),
+		"SELECT coalesce(v.id, 0), coalesce(v.name,''), coalesce(v.title,''), v.slug, coalesce(v.img_addr, ''), coalesce(v.seo_description,''),"+
+			" coalesce(v.seo_keywords,''), coalesce(v.description,''), coalesce(v.main_chart_id,0),"+
+			" JSON_AGG(json_build_object('id', c.id, 'name', c.name, 'title', c.title, 'description', c.description, 'datasets', d.arr_datasets)) as bounded_charts "+
+			"FROM chart_view "+
+			"JOIN view v ON v.id = chart_view.view_id "+
+			"JOIN chart c ON c.id = chart_view.chart_id "+
+			"JOIN ("+
+			"select dc.chart_id as chart_id, JSON_AGG(json_build_object('name', name, 'data', data)) as arr_datasets "+
+			"from dataset_chart as dc "+
+			"JOIN dataset d ON d.id = dc.dataset_id "+
+			"group by dc.chart_id) d ON d.chart_id = c.id "+
+			"WHERE v.id = $1 GROUP BY v.id", id)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	for rows.Next() {
+		var id, mainChartId int
+		var name, title, slug, seoDescription, seoKeywords, description, imgAddr string
+		var boundedCharts []map[string]interface{}
+		err := rows.Scan(&id, &name, &title, &slug, &imgAddr, &seoDescription, &seoKeywords, &description, &mainChartId, &boundedCharts)
+		arr := View{id, name, title, slug, imgAddr, seoDescription, seoKeywords, description, mainChartId, boundedCharts}
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		bytes, err := json.Marshal(arr)
+		if err != nil {
+			fmt.Println(err)
+		}
+		result = append(result, bytes...)
+	}
+
+	return result
 }
 
 func SetMainChart(chartId int, viewId int) error {
