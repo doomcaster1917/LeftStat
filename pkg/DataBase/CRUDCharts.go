@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 )
 
 type Charts struct {
@@ -128,41 +127,6 @@ func GetChart(id int) string {
 	return result
 }
 
-func GetCharts(ids []string) string {
-	var result []string
-	params := "{" + strings.Join(ids, ",") + "}"
-	rows, err := conn.Query(context.Background(),
-		"SELECT c.id, coalesce(c.return_order, 0), c.name, coalesce(c.title, ''), coalesce(c.description, ''), coalesce(c.main_axis_id, 0),"+
-			" JSON_AGG(json_build_object('id', d.id, 'name', d.name, 'data', d.data)) "+
-			"as dataset_name FROM dataset_chart "+
-			"FULL JOIN chart c ON c.id = dataset_chart.chart_id "+
-			"FULL JOIN dataset d ON d.id = dataset_chart.dataset_id "+
-			"WHERE c.id = ANY($1::int[]) "+
-			"GROUP BY c.id ORDER BY c.return_order", params)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	for rows.Next() {
-		var id, order, mainAxisId int
-		var name, title, description string
-		var datasets []map[string]interface{}
-		err := rows.Scan(&id, &order, &name, &title, &description, &mainAxisId, &datasets)
-		arr := Chart{id, order, name, title, description, mainAxisId, datasets}
-		if err != nil {
-			fmt.Println(111, err)
-		}
-		bytes, err := json.Marshal(arr)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		result = append(result, string(bytes))
-	}
-	return fmt.Sprintf("[%s]", strings.Join(result, `,`))
-}
-
 func BoundDatasetToChart(datasets []int, id int) error {
 
 	_, err := conn.Query(context.Background(), fmt.Sprintf("DELETE FROM dataset_chart WHERE chart_id = %d", id))
@@ -217,6 +181,37 @@ func DeleteChart(id int) error {
 	if err != nil {
 		fmt.Println(err)
 		return err
+	}
+	return nil
+}
+
+func GetChartTypeEnums() []string {
+	rows, err := conn.Query(context.Background(), "SELECT unnest(enum_range(NULL::chart_type))")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	enums := make([]string, 0)
+
+	for rows.Next() {
+		var ex string
+		err := rows.Scan(&ex)
+		if err != nil {
+			fmt.Println(err)
+		}
+		enums = append(enums, ex)
+	}
+
+	if err := rows.Err(); err != nil {
+		fmt.Printf("*** iteration error: %s", err)
+	}
+	return enums
+}
+
+func SetChartType(chart_type string, chartId int) error {
+	_, err := conn.Exec(context.Background(), "UPDATE chart SET chart_type = $1 WHERE id = $2", chart_type, chartId)
+	if err != nil {
+		fmt.Println(err)
 	}
 	return nil
 }

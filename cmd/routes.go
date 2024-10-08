@@ -20,6 +20,7 @@ func (app *application) routes() *http.ServeMux {
 	mux.HandleFunc("/terms/set_axis", app.SetAxis)
 	mux.HandleFunc("/terms/update_chart", app.UpdateChart)
 	mux.HandleFunc("/terms/charts/delete", app.deleteChart)
+	mux.HandleFunc("/terms/charts/get_chart_type_enums", app.getChartTypeEnums)
 	mux.HandleFunc("/terms/get_views", app.GetViews)
 	mux.HandleFunc("/terms/get_view", app.GetView)
 	mux.HandleFunc("/terms/update_view", app.UpdateView)

@@ -154,7 +154,7 @@ func GetView(id int) []byte {
 	rows, err := conn.Query(context.Background(),
 		"SELECT coalesce(v.id, 0), coalesce(v.name,''), coalesce(v.title,''), v.slug, coalesce(v.img_addr, ''), coalesce(v.seo_description,''),"+
 			" coalesce(v.seo_keywords,''), coalesce(v.description,''), coalesce(v.main_chart_id,0),"+
-			" JSON_AGG(json_build_object('id', c.id, 'name', c.name, 'title', c.title, 'description', c.description, 'datasets', d.arr_datasets)) as bounded_charts "+
+			" JSON_AGG(json_build_object('id', c.id, 'name', c.name, 'title', c.title, 'description', c.description, 'type', c.chart_type, 'datasets', d.arr_datasets)) as bounded_charts "+
 			"FROM chart_view "+
 			"JOIN view v ON v.id = chart_view.view_id "+
 			"JOIN chart c ON c.id = chart_view.chart_id "+

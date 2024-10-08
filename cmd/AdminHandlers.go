@@ -58,6 +58,19 @@ func (app *application) GetCharts(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func (app *application) getChartTypeEnums(res http.ResponseWriter, req *http.Request) {
+	token := strings.ReplaceAll(req.Header.Get("Authorization"), "Bearer ", "")
+	err := middleware.Auth(token)
+	if err != nil {
+		HeaderConfig := WithAuth{auth: "false"}
+		HeaderConfig.setHeaders(res)
+	} else {
+		HeaderConfig := WithAuth{auth: "true"}
+		response := HeaderConfig.setHeaders(res)
+		fmt.Fprintf(response, "[%s]", strings.Join(middleware.GetChartTypeEnums(), `,`)) //)
+	}
+}
+
 func (app *application) GetChart(res http.ResponseWriter, req *http.Request) {
 	id, err := strconv.Atoi(req.URL.Query().Get("id"))
 	token := strings.ReplaceAll(req.Header.Get("Authorization"), "Bearer ", "")

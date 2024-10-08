@@ -68,6 +68,8 @@ func GetAllCharts() []string {
 	return database.GetAllCharts()
 }
 
+func GetChartTypeEnums() []string { return database.GetChartTypeEnums() }
+
 func GetChartAdmin(id int) string {
 	var ch encharts_maker.Chart
 	var dts DatasetsShort
