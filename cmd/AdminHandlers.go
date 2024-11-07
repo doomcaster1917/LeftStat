@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-var frontendAddr = "https://leftstat.ru" //http://localhost:3000" //"
+var frontendAddr = "http://localhost:3000" //""https://leftstat.ru"
 
 type Login struct {
 	token string
@@ -18,9 +18,9 @@ type WithAuth struct {
 	auth string
 }
 
-type HeaderConfig interface {
-	SetHeaders()
-}
+//type HeaderConfig interface {
+//	SetHeaders()
+//}
 
 func (app *application) adminPanel(res http.ResponseWriter, req *http.Request) {
 	token := strings.ReplaceAll(req.Header.Get("Authorization"), "Bearer ", "")
@@ -107,6 +107,7 @@ func (app *application) UpdateDataset(res http.ResponseWriter, req *http.Request
 		err := middleware.UpdateDataset(req.Form.Get("sendMode"), req.Form.Get("name"),
 			req.Form.Get("raw"), id)
 		if err != nil {
+			fmt.Println(err.Error())
 			http.Error(res, fmt.Sprintf("%v", err), 400)
 		} else {
 			fmt.Fprintf(response, "success")
@@ -130,6 +131,7 @@ func (app *application) SelectDatasets(res http.ResponseWriter, req *http.Reques
 		response := HeaderConfig.setHeaders(res)
 		err := middleware.SelectDatasets(req.Form.Get("selected_datasets"), req.Form.Get("id"))
 		if err != nil {
+			fmt.Println(err.Error())
 			http.Error(res, fmt.Sprintf("%v", err), 400)
 		} else {
 			fmt.Fprintf(response, "success")
@@ -151,6 +153,7 @@ func (app *application) CreateChart(res http.ResponseWriter, req *http.Request) 
 		response := HeaderConfig.setHeaders(res)
 		err := middleware.CreateChart(req.Form.Get("name"), req.Form.Get("title"))
 		if err != nil {
+			fmt.Println(err.Error())
 			http.Error(res, fmt.Sprintf("%v", err), 400)
 		} else {
 			fmt.Fprintf(response, "success")
@@ -172,6 +175,7 @@ func (app *application) SetAxis(res http.ResponseWriter, req *http.Request) {
 		response := HeaderConfig.setHeaders(res)
 		err := middleware.SetAxis(req.Form.Get("dataset_id"), req.Form.Get("chart_id"))
 		if err != nil {
+			fmt.Println(err.Error())
 			http.Error(res, fmt.Sprintf("%v", err), 400)
 		} else {
 			fmt.Fprintf(response, "success")
@@ -193,6 +197,7 @@ func (app *application) UpdateChart(res http.ResponseWriter, req *http.Request) 
 		err := middleware.UpdateChart(req.Form.Get("name"), req.Form.Get("order"), req.Form.Get("title"),
 			req.Form.Get("description"), req.Form.Get("chart_id"))
 		if err != nil {
+			fmt.Println(err.Error())
 			http.Error(res, fmt.Sprintf("%v", err), 400)
 		} else {
 			fmt.Fprintf(response, "success")
@@ -238,9 +243,10 @@ func (app *application) UpdateView(res http.ResponseWriter, req *http.Request) {
 	} else {
 		HeaderConfig := WithAuth{auth: "true"}
 		response := HeaderConfig.setHeaders(res)
-		err := middleware.UpdateView(req.Form.Get("name"), req.Form.Get("title"),
+		err := middleware.UpdateView(req.Form.Get("name"), req.Form.Get("title"), req.Form.Get("slug"),
 			req.Form.Get("seoDescription"), req.Form.Get("seoKeywords"), req.Form.Get("description"), req.Form.Get("id"))
 		if err != nil {
+			fmt.Println(err.Error())
 			http.Error(res, fmt.Sprintf("%v", err), 400)
 		} else {
 			fmt.Fprintf(response, "success")
@@ -264,6 +270,7 @@ func (app *application) SetCharts(res http.ResponseWriter, req *http.Request) {
 		response := HeaderConfig.setHeaders(res)
 		err := middleware.SetCharts(req.Form.Get("selected_charts"), req.Form.Get("id"))
 		if err != nil {
+			fmt.Println(err.Error())
 			http.Error(res, fmt.Sprintf("%v", err), 400)
 		} else {
 			fmt.Fprintf(response, "success")
@@ -285,6 +292,7 @@ func (app *application) SetMainChart(res http.ResponseWriter, req *http.Request)
 		response := HeaderConfig.setHeaders(res)
 		err := middleware.SetMainChart(req.Form.Get("main_chart_id"), req.Form.Get("view_id"))
 		if err != nil {
+			fmt.Println(err.Error())
 			http.Error(res, fmt.Sprintf("%v", err), 400)
 		} else {
 			fmt.Fprintf(response, "success")
@@ -306,6 +314,7 @@ func (app *application) createView(res http.ResponseWriter, req *http.Request) {
 		response := HeaderConfig.setHeaders(res)
 		err := middleware.CreateView(req.Form.Get("name"), req.Form.Get("title"))
 		if err != nil {
+			fmt.Println(err.Error())
 			http.Error(res, fmt.Sprintf("%v", err), 400)
 		} else {
 			fmt.Fprintf(response, "success")
@@ -340,6 +349,7 @@ func (app *application) CreateDataset(res http.ResponseWriter, req *http.Request
 		response := HeaderConfig.setHeaders(res)
 		err := middleware.CreateDataset(req.Form.Get("name"))
 		if err != nil {
+			fmt.Println(err.Error())
 			http.Error(res, fmt.Sprintf("%v", err), 400)
 		} else {
 			fmt.Fprintf(response, "success")
@@ -360,6 +370,7 @@ func (app *application) deleteDataset(res http.ResponseWriter, req *http.Request
 
 		err := middleware.DeleteDataset(req.Form.Get("id"))
 		if err != nil {
+			fmt.Println(err.Error())
 			http.Error(res, fmt.Sprintf("%v", err), 400)
 		} else {
 			fmt.Fprintf(response, "success")
@@ -380,6 +391,7 @@ func (app *application) deleteChart(res http.ResponseWriter, req *http.Request) 
 
 		err := middleware.DeleteChart(req.Form.Get("id"))
 		if err != nil {
+			fmt.Println(err.Error())
 			http.Error(res, fmt.Sprintf("%v", err), 400)
 		} else {
 			fmt.Fprintf(response, "success")
@@ -400,6 +412,7 @@ func (app *application) deleteView(res http.ResponseWriter, req *http.Request) {
 
 		err := middleware.DeleteView(req.Form.Get("id"))
 		if err != nil {
+			fmt.Println(err.Error())
 			http.Error(res, fmt.Sprintf("%v", err), 400)
 		} else {
 			fmt.Fprintf(response, "success")
@@ -421,6 +434,33 @@ func (app *application) createImg(res http.ResponseWriter, req *http.Request) {
 
 		err := middleware.CreateImg(req.Form.Get("id"))
 		if err != nil {
+			fmt.Println(err.Error())
+			http.Error(res, fmt.Sprintf("%v", err), 400)
+		} else {
+			fmt.Fprintf(response, "success")
+		}
+	}
+}
+
+func (app *application) downloadViewImg(res http.ResponseWriter, req *http.Request) {
+	err := req.ParseMultipartForm(100)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	token := strings.ReplaceAll(req.FormValue("token"), "Bearer ", "")
+	err = middleware.Auth(token)
+
+	if err != nil {
+		HeaderConfig := WithAuth{auth: "false"}
+		HeaderConfig.setHeaders(res)
+	} else {
+		HeaderConfig := WithAuth{auth: "true"}
+		response := HeaderConfig.setHeaders(res)
+
+		err = middleware.DownloadViewImage(req)
+		if err != nil {
+			fmt.Println(err.Error())
 			http.Error(res, fmt.Sprintf("%v", err), 400)
 		} else {
 			fmt.Fprintf(response, "success")

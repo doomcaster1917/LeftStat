@@ -31,6 +31,7 @@ type OutputView struct {
 	Id             int
 	Name           string
 	Title          string
+	Slug           string
 	ImgAddr        string
 	SeoDescription string
 	SeoKeywords    string
